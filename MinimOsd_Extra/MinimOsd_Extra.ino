@@ -627,7 +627,13 @@ void loop()
 
 	pan_toggle(); // проверить переключение экранов
 
-	if(!lflags.need_redraw) {
+	// Throttle redraws to ~20Hz instead of once per received packet: at
+	// PX4 stream rates a redraw per packet keeps the CPU busy drawing
+	// while serial bytes overflow the 128-byte ring -> lost bytes, CRC
+	// errors and visible stutter.
+	static uint32_t last_redraw_time = 0;
+	if(!lflags.need_redraw && time_since(&last_redraw_time) > 45) {
+	    millis_plus(&last_redraw_time, 0);
 	    lflags.need_redraw=1;
 	    vsync_wait=1; // будем ждать прерывания
 	}

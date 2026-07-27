@@ -40,7 +40,7 @@ def encode(x, y, vis, sign, alt, alt2, alt3, alt4):
     if alt3 == 1: by |= 0x10
     return bx, by
 
-def build(osd_path):
+def build(osd_path, model='plane'):
     screens, cur = {}, None
     for line in open(osd_path, encoding='ascii', errors='replace'):
         line = line.rstrip('\r\n')
@@ -69,9 +69,18 @@ def build(osd_path):
         for name in ('Air Speed', 'Velocity', 'Wind Speed'):
             blk[IDX[name] * 2 + 1] &= ~0x40
 
+    # default.osd places "Real heading" (COG, arrows + %4i + deg, cols 10..16)
+    # immediately against "Heading" (col 16) - the heading digits overwrite the
+    # COG degree sign and the two read as one bogus number ("-30210").
+    # Relocate COG one row below the horizon, keeping its flags.
+    for blk in screens.values():
+        off = IDX['Real heading'] * 2
+        blk[off]     = (blk[off] & 0xC0) | 10   # x = 10, keep sign/alt4 bits
+        blk[off + 1] = (blk[off + 1] & 0xF0) | 11  # y = 11, keep on/alt bits
+
     s = bytearray(128)
     s[0:4] = bytes([0x00, 0x02, 0x00, 0x00])  # flags: mode_auto (PAL/NTSC autodetect)
-    s[4]  = 1                                  # model_type: copter
+    s[4]  = 0 if model == 'plane' else 1       # model_type: 0=plane 1=copter (check HEARTBEAT.type of your FC)
     s[11] = 23                                 # timeOffset: bias 20 + UTC offset (+3)
     s[15] = 20                                 # batt_warn_level %
     s[26] = 79                                 # CHK1_VERSION (= VER in Config.h)
@@ -92,6 +101,7 @@ if __name__ == '__main__':
     here = os.path.dirname(os.path.abspath(__file__))
     src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(here, '..', '..', 'Released', 'default.osd')
     dst = sys.argv[2] if len(sys.argv) > 2 else 'osd_eeprom_640.bin'
-    img = build(src)
+    model = sys.argv[3] if len(sys.argv) > 3 else 'plane'
+    img = build(src, model)
     open(dst, 'wb').write(img)
-    print('wrote %s (%d bytes) from %s' % (dst, len(img), src))
+    print('wrote %s (%d bytes, model=%s) from %s' % (dst, len(img), model, src))

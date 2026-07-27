@@ -849,7 +849,7 @@ static inline void check_warn(point p)
         wmask |= 1; //0
  
 //2    
-    if (sets.model_type==0 && iAirspeed < sets.stall && lflags.in_air ) // plane
+    if (sets.model_type==0 && sets.stall && iAirspeed < sets.stall && lflags.in_air ) // plane; stall=0 disables (otherwise a bogus negative airspeed - e.g. PX4 with no pitot - permanently trips it)
         wmask |= (1<<1);
 
 //3    
