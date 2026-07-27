@@ -238,19 +238,28 @@ if(apm_mav_system  != msgbuf.m.sysid){
 
 		if(mav_data_count==0){ // there is no data comes to OSD
 		    if(mav_raw_imu_count) { // we has IMU data but not GPS - stream overload
-		        if(lflags.mav_stream_overload < MAX_OVERLOAD_COUNT) 
+		        if(lflags.mav_stream_overload < MAX_OVERLOAD_COUNT)
     			    lflags.mav_stream_overload++;
+#if !defined(USE_MAVLINKPX4)
     		        else {
                             lflags.mav_request_done = 0; // make new request
                             if(stream_rate<127)
                                 stream_rate *=2;		// on half rate
                         }
+#endif
 		    } else { // no data at all
-		        if(lflags.mav_data_frozen < MAX_FROZEN_COUNT) 
+		        if(lflags.mav_data_frozen < MAX_FROZEN_COUNT)
     			    lflags.mav_data_frozen++;
-    		        else 
+#if !defined(USE_MAVLINKPX4)
+    		        else
                             lflags.mav_request_done = 0; // make new request
+#endif
                     }
+		    // PX4 ignores REQUEST_DATA_STREAM (deprecated - stream set comes from
+		    // the port's MAV_x_MODE profile), and without GPS its OSD profile sends
+		    // no "position data" at all, so the saturated frozen-counter was
+		    // re-requesting on EVERY heartbeat - and request_mavlink_rates() blocks
+		    // for 3x delay_150() = ~450ms. That was a hard periodic screen freeze.
 		} else { // there was GPS data
 		    lflags.mav_stream_overload =0; // reset counters
 		    lflags.mav_data_frozen=0;
