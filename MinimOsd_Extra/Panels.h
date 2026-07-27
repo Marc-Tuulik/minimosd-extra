@@ -2533,18 +2533,24 @@ static const PROGMEM Params params2[] = {
 #if defined(USE_SENSORS)// третий экран - сенсоры
 
 #define SENSOR(n) ((SensorInfo *)(EEPROM_offs(sensors) + n * sizeof(SensorInfo)))
+// For 's' rows the .value holds a uint16_t EEPROM byte-offset (read back via
+// pgm_read_word and passed straight to eeprom_read_len - it is never used as a
+// RAM pointer). Taking &SENSOR(n)->field synthesizes that offset via a pointer
+// member-access, which modern avr-gcc (>=7) rejects as dynamic initialization
+// of a PROGMEM object. Compute the offset arithmetically instead.
+#define SENSOR_OFF(n, field) ((void *)(EEPROM_offs(sensors) + (n) * sizeof(SensorInfo) + offsetof(SensorInfo, field)))
 
 static const PROGMEM Params params3[] = {
-	{n_sensors,     0,   0,             0}, 
-	{n_k_sensor1,   's', &SENSOR(0)->K, (2 <<4) | 5 },
-	{n_a_sensor1,   's', &SENSOR(0)->A, (2 <<4) | 7 },
-	{n_k_sensor2,   's', &SENSOR(1)->K, (2 <<4) | 5 },
-	{n_a_sensor1,   's', &SENSOR(1)->A, (2 <<4) | 7 },
-	{n_k_sensor3,   's', &SENSOR(2)->K, (2 <<4) | 6 },
-	{n_a_sensor1,   's', &SENSOR(2)->A, (2 <<4) | 7 },
-	{n_k_sensor4,   's', &SENSOR(3)->K, (2 <<4) | 6 },
-	{n_a_sensor1,   's', &SENSOR(3)->A, (2 <<4) | 7 },
-	
+	{n_sensors,     0,   0,                 0},
+	{n_k_sensor1,   's', SENSOR_OFF(0, K),  (2 <<4) | 5 },
+	{n_a_sensor1,   's', SENSOR_OFF(0, A),  (2 <<4) | 7 },
+	{n_k_sensor2,   's', SENSOR_OFF(1, K),  (2 <<4) | 5 },
+	{n_a_sensor1,   's', SENSOR_OFF(1, A),  (2 <<4) | 7 },
+	{n_k_sensor3,   's', SENSOR_OFF(2, K),  (2 <<4) | 6 },
+	{n_a_sensor1,   's', SENSOR_OFF(2, A),  (2 <<4) | 7 },
+	{n_k_sensor4,   's', SENSOR_OFF(3, K),  (2 <<4) | 6 },
+	{n_a_sensor1,   's', SENSOR_OFF(3, A),  (2 <<4) | 7 },
+
 };
 #endif
 
