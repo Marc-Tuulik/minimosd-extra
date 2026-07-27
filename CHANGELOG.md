@@ -1,3 +1,17 @@
+fork changes (feature/mavlink2-and-ms-speed), round 3:
+
+* The serial autobaud default (previously hardcoded 57600 when the line is
+  silent - also what the "No input data!" screen reported) is now persisted:
+  the last baud that produced valid packets is stored in EEPROM
+  (Settings.baud_pulse, previously pad space - no version bump) and used as
+  the power-up default. Tools/mavlink_config seeds it to 115200.
+* USE_ADSB disabled on the ATmega328 build to pay for it (~0.6KB): the
+  air-traffic panel needs an ADS-B receiver on the aircraft and PX4's OSD
+  profile doesn't stream ADSB_VEHICLE. Still enabled on 644/STM32 targets.
+* Two dead CRC-table rows dropped (PARAM_VALUE - slave builds only,
+  REQUEST_DATA_STREAM - TX-only). 328 builds now have ~0.5KB headroom:
+  MAVLINKPX4 30156, MAVLINK 30204 of 30720.
+
 fork changes (feature/mavlink2-and-ms-speed), round 2 - PX4 bring-up:
 
 * MAVLINKPX4 build fixes, verified against a real PX4 fixed-wing:

@@ -53,17 +53,28 @@ on the telemetry port; the firmware autobauds, 115200 recommended):
   into one unreadable number on screen.
 
 ### Fits on ATmega328 (30.7KB limit)
-MAVLink 2 initially cost ~6.4KB over the 328's flash. Reclaimed without
-dropping features:
+MAVLink 2 initially cost ~6.4KB over the 328's flash. Reclaimed:
 * MAVLink 2 packet signing (SHA-256) compiled out via `MAVLINK_NO_SIGNING` —
   this OSD never configures signing keys (~3.7KB)
-* message CRC table trimmed from 190 dialect entries to the 26 messages the
+* message CRC table trimmed from 190 dialect entries to the messages the
   firmware actually receives (~1.5KB)
 * build with the size flags from the project Makefile (see
   `MinimOsd_Extra/build-nano-cli.sh`) (~1.2KB)
+* `USE_ADSB` disabled on the 328 (~0.6KB) — the air-traffic panel needs an
+  ADS-B receiver on the aircraft, and PX4's OSD profile doesn't stream
+  `ADSB_VEHICLE`; it remains available on the bigger targets
 
-Current MAVLINK/328 build: **30676 / 30720 bytes**. There is almost no headroom
-left — check the size report after any change.
+Current 328 builds: **MAVLINKPX4 30156 / MAVLINK 30204 of 30720 bytes**
+(~0.5KB headroom) — check the size report after any change.
+
+### Autobaud default persisted in EEPROM
+The serial autobaud used a hardcoded 57600 default whenever the line was
+silent (also shown on the "No input data!" screen). The last baud rate that
+actually produced valid packets is now stored in EEPROM
+(`Settings.baud_pulse`, previously padding — no settings-version bump) and
+used as the power-up default, so an OSD paired with a 115200 link starts,
+listens and reports 115200 from the first moment. `Tools/mavlink_config`
+seeds new EEPROM images to 115200.
 
 ### Builds on modern avr-gcc
 * `params3` (sensor setup screen) used integer-to-pointer casts in a PROGMEM
