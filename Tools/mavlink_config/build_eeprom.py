@@ -79,7 +79,7 @@ def build(osd_path, model='plane'):
         blk[off + 1] = (blk[off + 1] & 0xF0) | 11  # y = 11, keep on/alt bits
 
     s = bytearray(128)
-    s[0:4] = bytes([0x00, 0x02, 0x00, 0x00])  # flags: mode_auto (PAL/NTSC autodetect)
+    s[0:4] = bytes([0x08, 0x02, 0x00, 0x00])  # flags: PAL_NTSC=PAL fallback (bit3) + mode_auto (byte1 bit1); PAL also gives the configurator its full 16-row canvas
     s[4]  = 0 if model == 'plane' else 1       # model_type: 0=plane 1=copter (check HEARTBEAT.type of your FC)
     s[11] = 23                                 # timeOffset: bias 20 + UTC offset (+3)
     s[15] = 20                                 # batt_warn_level %
