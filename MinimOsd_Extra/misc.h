@@ -95,27 +95,26 @@ bool parse_osd_packet(uint8_t *p){
 void mavlink_return_packet(uint8_t id, uint8_t len, uint8_t crc) {
     uint16_t checksum;
     
-    msgbuf.m.magic  = MAVLINK_STX;
-    msgbuf.m.len    = len;
-    msgbuf.m.incompat_flags = 0; // MAVLink2 header fields - don't reuse leftovers from the request
-    msgbuf.m.compat_flags   = 0;
-    msgbuf.m.msgid  = id;
-    msgbuf.m.sysid  = mavlink_system.sysid;
-    msgbuf.m.compid = MAV_COMP_ID_CAMERA; // stole this id
+    // Reply in MAVLink1 framing: the configurator's parser is v1-only, and this
+    // reply exists solely for it (config/EEPROM reads). The firmware's own RX
+    // path stays MAVLink2-capable - v1 is a legal frame on the same link.
+    uint8_t hdr[6];
+    hdr[0] = MAVLINK_STX_MAVLINK1; // 0xFE
+    hdr[1] = len;
+    hdr[2] = msgbuf.m.seq;         // echo the request's sequence
+    hdr[3] = mavlink_system.sysid;
+    hdr[4] = MAV_COMP_ID_CAMERA;   // stole this id
+    hdr[5] = id;
 
-    // MAVLink2: msgid is uint32 in the struct but 3 bytes on the wire, so header
-    // and payload are no longer contiguous - CRC them separately (the old single
-    // crc_calculate over header+payload produced broken reply CRCs).
-    checksum = crc_calculate(((const uint8_t*)&msgbuf.m.len), MAVLINK_CORE_HEADER_LEN);
+    checksum = crc_calculate(&hdr[1], 5);
     crc_accumulate_buffer(&checksum, (const char *)&msgbuf.m.payload64, len);
 #if MAVLINK_CRC_EXTRA
     crc_accumulate(crc, &checksum);
 #endif
-//    serial_hex_dump((uint8_t *)&msgbuf.m.magic, MAVLINK_NUM_HEADER_BYTES + len);
 
-    _mavlink_send_uart((mavlink_channel_t)0, (const char *)&msgbuf.m.magic, MAVLINK_NUM_HEADER_BYTES);
+    _mavlink_send_uart((mavlink_channel_t)0, (const char *)hdr, 6);
     _mavlink_send_uart((mavlink_channel_t)0, (const char *)&msgbuf.m.payload64, len );
-    _mavlink_send_uart((mavlink_channel_t)0, (const char *)&checksum, 2);    
+    _mavlink_send_uart((mavlink_channel_t)0, (const char *)&checksum, 2);
 }
 
 

@@ -50,13 +50,21 @@ def drain(dur=0.05):
     return buf
 
 def find_frames(buf, want_id):
+    # firmware replies to config reads in MAVLink1 framing (for the v1-only
+    # configurator); accept both v1 (0xFE) and v2 (0xFD) frames here
     out, i = [], 0
-    while i < len(buf) - 12:
-        if buf[i] == 0xFD:
+    while i < len(buf) - 8:
+        if buf[i] == 0xFD and i + 12 <= len(buf):
             ln = buf[i+1]; mid = buf[i+7] | (buf[i+8]<<8) | (buf[i+9]<<16)
             end = i + 10 + ln + 2
             if end <= len(buf):
                 if mid == want_id: out.append(bytes(buf[i+10:i+10+ln]))
+                i = end; continue
+        elif buf[i] == 0xFE:
+            ln = buf[i+1]; mid = buf[i+5]
+            end = i + 6 + ln + 2
+            if end <= len(buf):
+                if mid == want_id: out.append(bytes(buf[i+6:i+6+ln]))
                 i = end; continue
         i += 1
     return out

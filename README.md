@@ -114,8 +114,13 @@ Everything can be done over the board's serial header (FTDI with DTR reset):
 2. **Firmware**: `MinimOsd_Extra/build-nano-cli.sh`, flash the hex with
    avrdude (`-c arduino -b 115200` for Optiboot, `-b 57600` for old
    bootloaders).
-3. **Configuration**: either the classic `OSD_Config.exe` from
-   `Released/FW_+_Char`, or headless via `Tools/mavlink_config/`.
+3. **Configuration**: `Released/OSD_Config.exe` with **Options -> "MAVlink
+   mode" checked** (talks to the running firmware over the same serial port),
+   or headless via `Tools/mavlink_config/`. The configurator's classic
+   bootloader path ("Failed to talk to bootloader") does not work on chips
+   with Optiboot - Optiboot has no EEPROM support (and the CT's bootloader
+   baud is fixed at 57600); config replies are sent MAVLink1-framed because
+   the CT's parser is v1-only.
 4. A board with a blank EEPROM shows a version-check error / unconfigured
    layout — step 3 fixes that. The `No input data! <n>` screen with the
    detected baud rate is the normal idle state without telemetry.
