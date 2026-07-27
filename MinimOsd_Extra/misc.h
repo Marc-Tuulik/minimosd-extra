@@ -97,11 +97,17 @@ void mavlink_return_packet(uint8_t id, uint8_t len, uint8_t crc) {
     
     msgbuf.m.magic  = MAVLINK_STX;
     msgbuf.m.len    = len;
+    msgbuf.m.incompat_flags = 0; // MAVLink2 header fields - don't reuse leftovers from the request
+    msgbuf.m.compat_flags   = 0;
     msgbuf.m.msgid  = id;
     msgbuf.m.sysid  = mavlink_system.sysid;
     msgbuf.m.compid = MAV_COMP_ID_CAMERA; // stole this id
 
-    checksum = crc_calculate(((const uint8_t*)&msgbuf.m.len), MAVLINK_CORE_HEADER_LEN + len);
+    // MAVLink2: msgid is uint32 in the struct but 3 bytes on the wire, so header
+    // and payload are no longer contiguous - CRC them separately (the old single
+    // crc_calculate over header+payload produced broken reply CRCs).
+    checksum = crc_calculate(((const uint8_t*)&msgbuf.m.len), MAVLINK_CORE_HEADER_LEN);
+    crc_accumulate_buffer(&checksum, (const char *)&msgbuf.m.payload64, len);
 #if MAVLINK_CRC_EXTRA
     crc_accumulate(crc, &checksum);
 #endif
