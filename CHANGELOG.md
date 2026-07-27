@@ -8,6 +8,13 @@ fork changes (feature/mavlink2-and-ms-speed):
   The per-panel "alternate units" toggle now shows km/h instead of m/s.
   Note: metric speed warning thresholds (stall / overspeed) are now interpreted
   in m/s and must be re-entered in the configurator accordingly.
+* Flash-size work so MAVLink 2 still fits the ATmega328 (30666/30720 bytes with
+  all features): packet-signing (SHA-256) compiled out via MAVLINK_NO_SIGNING
+  (this OSD never configures signing keys), and the v2 message CRC table trimmed
+  from 190 entries to the 26 messages the firmware actually uses. Also fixed two
+  direct PROGMEM reads in the bundled v2 parser that would have broken CRC
+  validation on AVR, and added build-nano-cli.sh (arduino-cli build recipe with
+  the required size flags).
 
 v813:
 

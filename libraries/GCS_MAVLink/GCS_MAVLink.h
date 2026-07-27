@@ -27,6 +27,20 @@
 
 #define MAVLINK_COMM_NUM_CHANNELS 1
 
+// Compile out MAVLink2 packet signing (SHA-256) - this OSD never configures
+// signing keys, so the code could only ever take its "no signing" path while
+// costing several KB of flash on the ATmega328. See mavlink_helpers.h stubs.
+#define MAVLINK_NO_SIGNING 1
+
+// Trim the MAVLink2 message CRC/length table (190 entries, ~1.7KB PROGMEM in
+// the full ardupilotmega dialect) down to the messages this firmware actually
+// receives, plus PARAM_VALUE (22, slave builds) and REQUEST_DATA_STREAM (66).
+// Entries are verbatim rows of the full table in ardupilotmega.h and MUST stay
+// sorted by msgid (mavlink_get_msg_entry uses a bisection search). Messages
+// not listed simply fail CRC lookup and are dropped - same net effect as the
+// parser's default case ignoring them.
+#define MAVLINK_MESSAGE_CRCS {{0, 50, 9, 0, 0, 0}, {1, 124, 31, 0, 0, 0}, {2, 137, 12, 0, 0, 0}, {22, 220, 25, 0, 0, 0}, {24, 24, 30, 0, 0, 0}, {27, 144, 26, 0, 0, 0}, {29, 115, 14, 0, 0, 0}, {30, 39, 28, 0, 0, 0}, {33, 104, 28, 0, 0, 0}, {35, 244, 22, 0, 0, 0}, {36, 222, 21, 0, 0, 0}, {42, 28, 2, 0, 0, 0}, {62, 183, 26, 0, 0, 0}, {65, 118, 42, 0, 0, 0}, {66, 148, 6, 3, 2, 3}, {74, 20, 20, 0, 0, 0}, {109, 185, 9, 0, 0, 0}, {131, 223, 255, 0, 0, 0}, {137, 195, 14, 0, 0, 0}, {162, 189, 8, 0, 0, 0}, {166, 21, 9, 0, 0, 0}, {168, 1, 12, 0, 0, 0}, {181, 174, 4, 0, 0, 0}, {241, 90, 32, 0, 0, 0}, {246, 184, 38, 0, 0, 0}, {253, 83, 51, 0, 0, 0}}
+
 #include "include/mavlink/v2.0/ardupilotmega/version.h"
 
 #define MAVLINK_COMM_NUM_BUFFERS 1

@@ -11,7 +11,9 @@
 #define MAVLINK_HELPER
 #endif
 
+#ifndef MAVLINK_NO_SIGNING
 #include "mavlink_sha256.h"
+#endif
 
 /*
  * Internal function to give access to the channel status for each channel
@@ -58,6 +60,22 @@ MAVLINK_HELPER void mavlink_reset_channel_status(uint8_t chan)
 /**
  * @brief create a signature block for a packet
  */
+#ifdef MAVLINK_NO_SIGNING
+// Signing support compiled out to save flash (SHA-256 is several KB on AVR).
+// This build never sets status->signing / signing->flags, so the real
+// implementation could only ever take its early-return path anyway - the stub
+// preserves the API and the exact behaviour of that path.
+MAVLINK_HELPER uint8_t mavlink_sign_packet(mavlink_signing_t *signing,
+					   uint8_t signature[MAVLINK_SIGNATURE_BLOCK_LEN],
+					   const uint8_t *header, uint8_t header_len,
+					   const uint8_t *packet, uint8_t packet_len,
+					   const uint8_t crc[2])
+{
+	(void)signing; (void)signature; (void)header; (void)header_len;
+	(void)packet; (void)packet_len; (void)crc;
+	return 0;
+}
+#else
 MAVLINK_HELPER uint8_t mavlink_sign_packet(mavlink_signing_t *signing,
 					   uint8_t signature[MAVLINK_SIGNATURE_BLOCK_LEN],
 					   const uint8_t *header, uint8_t header_len,
@@ -84,9 +102,10 @@ MAVLINK_HELPER uint8_t mavlink_sign_packet(mavlink_signing_t *signing,
 	mavlink_sha256_update(&ctx, crc, 2);
 	mavlink_sha256_update(&ctx, signature, 7);
 	mavlink_sha256_final_48(&ctx, &signature[7]);
-	
+
 	return MAVLINK_SIGNATURE_BLOCK_LEN;
 }
+#endif // MAVLINK_NO_SIGNING
 
 /**
  * return new packet length for trimming payload of any trailing zero
@@ -104,6 +123,17 @@ MAVLINK_HELPER uint8_t _mav_trim_payload(const char *payload, uint8_t length)
 /**
  * @brief check a signature block for a packet
  */
+#ifdef MAVLINK_NO_SIGNING
+// See mavlink_sign_packet stub above: signing is never configured in this
+// build, so the real function could only take its signing==NULL path.
+MAVLINK_HELPER bool mavlink_signature_check(mavlink_signing_t *signing,
+					    mavlink_signing_streams_t *signing_streams,
+					    const mavlink_message_t *msg)
+{
+	(void)signing; (void)signing_streams; (void)msg;
+	return true;
+}
+#else
 MAVLINK_HELPER bool mavlink_signature_check(mavlink_signing_t *signing,
 					    mavlink_signing_streams_t *signing_streams,
 					    const mavlink_message_t *msg)
@@ -182,6 +212,7 @@ MAVLINK_HELPER bool mavlink_signature_check(mavlink_signing_t *signing,
 	}
 	return true;
 }
+#endif // MAVLINK_NO_SIGNING
 
 
 /**
@@ -501,7 +532,7 @@ MAVLINK_HELPER const mavlink_msg_entry_t *mavlink_get_msg_entry(uint32_t msgid)
             low = mid;
             break;
         }
-        if (mavlink_message_crcs[low].msgid != msgid) {
+        if (pgm_read_dword(&mavlink_message_crcs[low].msgid) != msgid) { // direct read misses PROGMEM on AVR
             // msgid is not in the table
             return NULL;
         }
@@ -731,8 +762,11 @@ MAVLINK_HELPER uint8_t mavlink_frame_char_buffer(mavlink_message_t* rxmsg,
                 rxmsg->ck[0] = c;
 
 		// zero-fill the packet to cope with short incoming packets
-		if (e && status->packet_idx < e->msg_len) {
-			memset(&_MAV_PAYLOAD_NON_CONST(rxmsg)[status->packet_idx], 0, e->msg_len - status->packet_idx);
+		if (e) { // e->msg_len lives in PROGMEM on AVR - must not be read directly
+			uint8_t e_msg_len = pgm_read_byte(&e->msg_len);
+			if (status->packet_idx < e_msg_len) {
+				memset(&_MAV_PAYLOAD_NON_CONST(rxmsg)[status->packet_idx], 0, e_msg_len - status->packet_idx);
+			}
 		}
 		break;
         }
