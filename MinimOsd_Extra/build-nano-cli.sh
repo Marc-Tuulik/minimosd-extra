@@ -8,13 +8,17 @@
 # on by the code, do not drop them). With MAVLink2 the result is ~30.7KB, right
 # at the 30720-byte limit, so keep an eye on the size report.
 #
-# Usage: ./build-nano-cli.sh   (from MinimOsd_Extra/, needs arduino-cli in PATH)
+# Usage: ./build-nano-cli.sh [PROTO]   (from MinimOsd_Extra/, arduino-cli in PATH)
+#   PROTO: MAVLINK (default, APM/ArduPilot) or MAVLINKPX4 (PX4 - correct PX4
+#   main/sub flight-mode names; use this variant with PX4 flight controllers)
 
 set -e
 
+PROTO="${1:-MAVLINK}"
+
 SRC="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(dirname "$SRC")"
-OUT="$SRC/build-nano"
+OUT="$SRC/build-nano-$PROTO"
 
 SZ="-mcall-prologues -mrelax -ffast-math -fsingle-precision-constant \
 -fassociative-math -freciprocal-math -fno-signed-zeros -fno-trapping-math \
@@ -25,8 +29,8 @@ arduino-cli compile \
   --fqbn arduino:avr:nano \
   --libraries "$ROOT/libraries" \
   --build-path "$OUT" \
-  --build-property "compiler.cpp.extra_flags=-DUSE_MAVLINK=1 -I$ROOT/libraries/GCS_MAVLink $SZ" \
-  --build-property "compiler.c.extra_flags=-DUSE_MAVLINK=1 -I$ROOT/libraries/GCS_MAVLink $SZ" \
+  --build-property "compiler.cpp.extra_flags=-DUSE_${PROTO}=1 -I$ROOT/libraries/GCS_MAVLink $SZ" \
+  --build-property "compiler.c.extra_flags=-DUSE_${PROTO}=1 -I$ROOT/libraries/GCS_MAVLink $SZ" \
   --build-property "compiler.c.elf.extra_flags=$SZ -Wl,--relax" \
   "$SRC"
 
