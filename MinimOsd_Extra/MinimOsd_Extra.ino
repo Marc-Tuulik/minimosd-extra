@@ -627,13 +627,15 @@ void loop()
 
 	pan_toggle(); // проверить переключение экранов
 
-	// Throttle redraws to ~20Hz instead of once per received packet: at
-	// PX4 stream rates a redraw per packet keeps the CPU busy drawing
-	// while serial bytes overflow the 128-byte ring -> lost bytes, CRC
-	// errors and visible stutter.
-	static uint32_t last_redraw_time = 0;
-	if(!lflags.need_redraw && time_since(&last_redraw_time) > 45) {
-	    millis_plus(&last_redraw_time, 0);
+	// Frame-locked redraw throttle: draw on every 2nd VSYNC (25Hz PAL /
+	// 30Hz NTSC) instead of once per received packet. Per-packet redraws
+	// kept the CPU drawing while serial overflowed the RX ring, and a
+	// plain ms-timer throttle beats against the 20ms frame grid (updates
+	// land 2-then-3 frames apart = visible judder). VSYNC keeps firing
+	// even without a camera - the MAX7456 falls back to internal sync.
+	static uint8_t last_redraw_frame = 0;
+	if(!lflags.need_redraw && (uint8_t)(vsync_count - last_redraw_frame) >= 2) {
+	    last_redraw_frame = vsync_count;
 	    lflags.need_redraw=1;
 	    vsync_wait=1; // будем ждать прерывания
 	}
