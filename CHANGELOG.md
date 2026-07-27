@@ -1,3 +1,29 @@
+fork changes (feature/mavlink2-and-ms-speed), round 2 - PX4 bring-up:
+
+* MAVLINKPX4 build fixes, verified against a real PX4 fixed-wing:
+  - AUTO sub-mode names were off by one (LOITER/HOLD displayed as "miss",
+    MISSION as "rtl"); the enum starts at 1, the name table at 0.
+  - NaN telemetry values (attitude/climb/airspeed before EKF alignment) are
+    sanitized to 0 instead of printing garbage ints (NAN0(), PX4 build only).
+  - The REQUEST_DATA_STREAM re-request cycle is compiled out: PX4 ignores it
+    (deprecated), and on a GPS-less bench the saturated "stream frozen"
+    counter made every heartbeat fire a request burst with 3x delay_150() -
+    a ~450ms hard screen freeze about once a second.
+  - VFR_HUD heading clamped to 0..360.
+* Screen redraws are frame-locked: draw on every 2nd VSYNC (25Hz PAL / 30Hz
+  NTSC) instead of once per received packet. Fixes serial-overflow stutter at
+  PX4 stream rates and the judder of a ms-timer throttle beating against the
+  frame grid.
+* Stall warning: stall=0 now disables the check (an uncalibrated pitot
+  reporting negative airspeed otherwise trips it permanently).
+* Tools/mavlink_config: build_eeprom.py takes a plane/copter argument, clears
+  the alternate-units flag on speed panels (semantics inverted by the km/h ->
+  m/s change), and relocates the COG panel away from the Heading panel -
+  default.osd butts them together and the pair reads as one bogus number
+  ("-30210" = COG -30 + heading 210).
+* Tools/font_updater: minimal MAX7456 charset updater (the stock
+  Character_Updater builds did not respond on test hardware).
+
 fork changes (feature/mavlink2-and-ms-speed):
 
 * MAVLink v2 support - telemetry input now parses MAVLink 2 frames (0xFD) while

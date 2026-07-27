@@ -23,13 +23,34 @@ toolchains.
     message struct stores msgid as uint32 vs 3 bytes on the wire, so header and
     payload must be CRC'd separately
 
+### PX4 support (MAVLINKPX4 build)
+Verified end-to-end against a real PX4 fixed-wing (mode `MAV_x_MODE = OSD`
+on the telemetry port; the firmware autobauds, 115200 recommended):
+* AUTO sub-mode names fixed (off-by-one: HOLD showed as "miss", MISSION as
+  "rtl") - mode labels now match QGroundControl.
+* NaN telemetry (attitude / climb / airspeed before EKF alignment) sanitized
+  instead of printing garbage; VFR_HUD heading clamped to 0..360.
+* The deprecated `REQUEST_DATA_STREAM` re-request cycle is compiled out - on
+  a GPS-less bench it blocked the main loop ~450ms every heartbeat (hard
+  periodic screen freeze). PX4 stream rates come from the port profile.
+* Redraws are frame-locked to every 2nd VSYNC (25Hz PAL / 30Hz NTSC), fixing
+  serial-overflow stutter at PX4 stream rates.
+* Build with `./build-nano-cli.sh MAVLINKPX4`. Handy to know: PX4 sends
+  battery voltage `UINT16_MAX` mV ("unknown") when unpowered from USB - the
+  OSD then shows 65.54V. The board LED doubles as a loop-alive heartbeat
+  (steady 2Hz blink = healthy; pauses = main loop blocked).
+
 ### Metric speed in m/s
 * All metric speed panels (ground speed, air speed, wind speed, max speeds,
   setup screen) now read **m/s** instead of km/h. The per-panel "alternate
   units" toggle shows km/h.
 * Note: metric stall / overspeed warning thresholds are now interpreted in m/s —
   re-enter them accordingly. The bundled configurator still *labels* speeds as
-  km/h (cosmetic only).
+  km/h (cosmetic only), and its per-panel "alternate units" checkbox on speed
+  panels now means km/h (it used to mean m/s) — leave it unchecked for m/s.
+  When placing panels, don't butt "Real heading" (COG) against "Heading": COG
+  is 7 chars wide (arrows + value + degree sign) and adjacent panels merge
+  into one unreadable number on screen.
 
 ### Fits on ATmega328 (30.7KB limit)
 MAVLink 2 initially cost ~6.4KB over the 328's flash. Reclaimed without
