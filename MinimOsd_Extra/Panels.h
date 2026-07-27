@@ -1520,9 +1520,9 @@ static void panWaitMAVBeats(){
 //    osd.printf_P(PSTR("\xffmav max=%lu sum= %lu \xffcnt=%u\xff"), mavlink_dt, mavlink_time, mavlink_cnt );
     
     lflags.input_active=0;
-#else
-    panFdata(do_alt({3,4}));
 #endif
+    // (used to also draw the panFdata flight summary here - removed so the
+    //  no-data screen shows only the message and detected baud rate)
 }
 
 

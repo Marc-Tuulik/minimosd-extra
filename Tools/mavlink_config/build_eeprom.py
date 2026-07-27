@@ -62,6 +62,13 @@ def build(osd_path):
             off = pid * 2
             if off < 128 and off not in known: blk[off+1] |= 0x80
 
+    # This fork's base speed unit is m/s (was km/h), which inverts the meaning
+    # of the per-panel alternate-units flag on speed panels: old layouts set it
+    # to get m/s, now it selects km/h. Clear it so those panels show m/s.
+    for blk in screens.values():
+        for name in ('Air Speed', 'Velocity', 'Wind Speed'):
+            blk[IDX[name] * 2 + 1] &= ~0x40
+
     s = bytearray(128)
     s[0:4] = bytes([0x00, 0x02, 0x00, 0x00])  # flags: mode_auto (PAL/NTSC autodetect)
     s[4]  = 1                                  # model_type: copter
