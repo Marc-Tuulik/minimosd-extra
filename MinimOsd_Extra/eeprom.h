@@ -192,7 +192,9 @@ struct Settings {
     byte hw_version; // written by firmware for CT
 
     byte halfThrottleCurrent;
-    
+
+    byte baud_pulse; // AUTOBAUD: last locked bit-pulse width (us) - used as the
+                     // power-up default instead of hardcoded 57600. 0/0xFF = unset.
 };
 
 union _Settings {

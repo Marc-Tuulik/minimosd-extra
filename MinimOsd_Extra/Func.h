@@ -639,17 +639,29 @@ void setFdataVars()
 
 
 
+#if defined(AUTOBAUD)
+static uint8_t last_pulse = 0; // autobaud bit-pulse width; 0 = seed from EEPROM on first use
+#endif
+
 void NOINLINE set_data_got() {
     lastMAVBeat = millis();
     //millis_plus(&lastMAVBeat, 0);
     lastMavSeconds=seconds;
 
     lflags.got_data = 1;
-#ifdef DEBUG
     if(!lflags.input_active){ // first got packet
+#ifdef DEBUG
 	max_dly=0;
-    }
 #endif
+#if defined(AUTOBAUD)
+	// the baud we just locked on becomes the power-up default (and what the
+	// "No input data!" screen reports) instead of the hardcoded 57600
+	if(sets.baud_pulse != last_pulse) {
+	    sets.baud_pulse = last_pulse;
+	    eeprom_write_len((byte *)&sets.baud_pulse, EEPROM_offs(sets) + offsetof(Settings, baud_pulse), 1);
+	}
+#endif
+    }
     lflags.input_active=1;
 }
 
@@ -692,7 +704,10 @@ again:
     
 #if defined(AUTOBAUD)
 	Serial.end();
-	static uint8_t last_pulse = 15; // 57600 by default
+	if(!last_pulse) { // first run: default to the last baud that produced data (EEPROM)
+	    last_pulse = sets.baud_pulse;
+	    if(last_pulse == 0 || last_pulse == 0xFF) last_pulse = 15; // fresh EEPROM: 57600
+	}
 	uint8_t pulse=255;
 
 	{ // isolate PT and SPEED

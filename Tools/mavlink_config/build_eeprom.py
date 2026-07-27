@@ -90,6 +90,9 @@ def build(osd_path, model='plane'):
     s[67] = 0x10                               # vert_offs  (neutral)
     s[68] = 0x20                               # horiz_offs (neutral)
     s[71] = 1                                  # n_screens
+    s[79] = 9                                  # baud_pulse: seed autobaud default to 115200
+                                               # (bit-pulse us; <11 -> 115200, 15 -> 57600);
+                                               # self-updates on first successful lock
 
     img = bytearray()
     for n in range(4):

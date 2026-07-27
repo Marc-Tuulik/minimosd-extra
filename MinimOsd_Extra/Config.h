@@ -63,7 +63,9 @@
 #define USE_SENSORS 1
 #endif
 
-#define USE_ADSB 1
+//#define USE_ADSB 1 - disabled on the 328 to free flash for MAVLink2 + the
+// persisted autobaud default. The air-traffic panel needs an ADS-B receiver
+// on the aircraft, and PX4's OSD telemetry profile doesn't stream ADSB_VEHICLE.
 #define SHOW_NO_DATA 1
 #define USE_VIBE 1
 
