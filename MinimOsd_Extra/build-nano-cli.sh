@@ -23,7 +23,11 @@ OUT="$SRC/build-nano-$PROTO"
 SZ="-mcall-prologues -mrelax -ffast-math -fsingle-precision-constant \
 -fassociative-math -freciprocal-math -fno-signed-zeros -fno-trapping-math \
 -fmerge-all-constants -finline-functions-called-once -finline-small-functions \
--fno-caller-saves -funsigned-bitfields -fwrapv -fno-strict-aliasing"
+-fno-caller-saves -funsigned-bitfields -fwrapv -fno-strict-aliasing \
+-DSERIAL_RX_BUFFER_SIZE=192 -DSERIAL_TX_BUFFER_SIZE=128"
+# serial rings: TX was 4 bytes (!) so every 263-byte config reply blocked the
+# parse loop ~46ms - sustained config traffic saturated and dropped requests;
+# RX 192 absorbs a full request across a screen-redraw stall
 
 arduino-cli compile \
   --fqbn arduino:avr:nano \

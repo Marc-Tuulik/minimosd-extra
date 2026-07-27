@@ -726,11 +726,17 @@ void loop()
 	    if( vas_vsync && vsync_count < 5) { // при частоте кадров их должно быть 25 или 50
 	                                            // но есть платы где эта нога не подключена. Китай...
 	        max7456_err_count++;
-                if(max7456_err_count>3) { // 3 seconds bad sync
-#ifdef DEBUG   
+                // osd.reset() blocks ~300ms and was retriggering EVERY second
+                // (the error count was never cleared) - each reset silently ate
+                // all serial traffic in its window: configurator reads timed
+                // out, telemetry stuttered. Only reset while the link is idle,
+                // and clear the counter so it retries every ~4s, not every 1s.
+                if(max7456_err_count>3 && time_since(&lastMAVBeat) > 2000) { // 3 seconds bad sync
+#ifdef DEBUG
                     Serial.printf_P(PSTR("restart MAX! vsync_count=%d\n"),vsync_count);
 #endif
                     osd.reset();    // restart MAX7456
+                    max7456_err_count=0;
                 }
 	    } else  max7456_err_count=0;
 

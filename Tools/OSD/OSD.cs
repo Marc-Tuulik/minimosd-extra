@@ -4437,7 +4437,7 @@ typedef struct __mavlink_radio_status_t
                         };
 
                         sendPacket(ed);
-                        for (int i = 0; i < 10; i++) {
+                        for (int i = 0; i < 25; i++) { // 250ms/block: a v1 request+reply is ~91ms of wire time - 100ms pacing ran the link near saturation
                             System.Threading.Thread.Sleep(10);
                             Application.DoEvents();
                         }
@@ -4541,7 +4541,7 @@ typedef struct __mavlink_radio_status_t
                     sendPacket(ed);
                     if(!mav_blocks[n])  sendPacket(ed);
                     if (!mav_blocks[n]) sendPacket(ed);
-                    System.Threading.Thread.Sleep(100);
+                    System.Threading.Thread.Sleep(250); // see read pacing note
                 }
                 if (got_osd_packet) { // OSD confirms receiving so we can check packets
                     bool need_send=false;

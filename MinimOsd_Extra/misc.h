@@ -25,10 +25,10 @@ bool parse_osd_packet(uint8_t *p){
 	case 'w':
 	    eeprom_write_len((uint8_t *)&c->data, (uint16_t)(c->id) * 128,  c->len );
 	    lflags.was_mav_config=1;
- #if HARDWARE_TYPE >0
+            // confirm on ALL hardware (was HARDWARE_TYPE>0 only): without the
+            // '!' ack the configurator writes blind and cannot verify/retry
             c->cmd='!'; // confirm
             mavlink_return_packet(MAVLINK_MSG_ID_ENCAPSULATED_DATA, MAVLINK_MSG_ID_ENCAPSULATED_DATA_LEN, MAVLINK_MSG_ID_ENCAPSULATED_DATA_CRC); // send packet back
- #endif
 	    return true;
 	
 	
