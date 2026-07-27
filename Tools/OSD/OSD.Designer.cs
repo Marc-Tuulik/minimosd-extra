@@ -1683,7 +1683,7 @@ namespace OSD {
             this.OVERSPEED_label.Name = "OVERSPEED_label";
             this.OVERSPEED_label.Size = new System.Drawing.Size(90, 13);
             this.OVERSPEED_label.TabIndex = 4;
-            this.OVERSPEED_label.Text = "Overspeed, km/h";
+            this.OVERSPEED_label.Text = "Overspeed, m/s";
             // 
             // OVERSPEED_numeric
             // 
@@ -1706,7 +1706,7 @@ namespace OSD {
             this.STALL_label.Name = "STALL_label";
             this.STALL_label.Size = new System.Drawing.Size(92, 13);
             this.STALL_label.TabIndex = 2;
-            this.STALL_label.Text = "Stall Speed, km/h";
+            this.STALL_label.Text = "Stall Speed, m/s";
             this.STALL_label.UseMnemonic = false;
             // 
             // STALL_numeric

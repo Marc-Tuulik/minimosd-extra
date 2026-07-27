@@ -1,5 +1,11 @@
 fork changes (feature/mavlink2-and-ms-speed), round 3:
 
+* Configurator (Tools/OSD) updated for the m/s change and rebuilt
+  (Released/OSD_Config.exe, .NET 4.0): simulator renders metric speeds in
+  m/s with the right charset glyph, stall/overspeed labels say m/s, speed
+  panels' checkbox is now "Show in km/h". Fixed two pre-existing
+  short/ushort compile errors in the checked-in source.
+
 * The serial autobaud default (previously hardcoded 57600 when the line is
   silent - also what the "No input data!" screen reported) is now persisted:
   the last baud that produced valid packets is stored in EEPROM

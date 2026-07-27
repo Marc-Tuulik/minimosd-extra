@@ -188,7 +188,7 @@ namespace ArdupilotMega
 //			return down_flag;
 //		}
 		
-        public byte[] downloadflash (short length) {
+        public byte[] downloadflash (ushort length) { // fork: ushort to match callers
 			if(!this.IsOpen) {
 				throw new Exception("Port Not Open");
 			}
@@ -297,7 +297,7 @@ namespace ArdupilotMega
         /// <param name="length">length to send</param>
         /// <param name="startaddress">sets eeprom start programing address</param>
         /// <returns>true = passed, false = failed</returns>
-        public bool upload(byte[] data, short startfrom, short length, short startaddress)
+        public bool upload(byte[] data, ushort startfrom, ushort length, ushort startaddress) // fork: ushort - callers pass EEPROM offsets/lengths as ushort
         {
             if (!this.IsOpen)
             {
@@ -322,7 +322,7 @@ namespace ArdupilotMega
                     return true; //no more data to send
 
                 setaddress(startaddress);
-                startaddress += (short)sending;
+                startaddress += (ushort)sending;
 
                 byte[] command = new byte[] { (byte)'d', (byte)(sending >> 8), (byte)(sending & 0xff), (byte)'E' };
                 this.Write(command, 0, command.Length);

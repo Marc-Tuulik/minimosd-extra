@@ -47,3 +47,6 @@ cscope.po.out
 dataflash.bin
 eeprom.bin
 index.html
+
+Tools/OSD/bin/
+Tools/OSD/obj/

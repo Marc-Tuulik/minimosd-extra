@@ -97,10 +97,10 @@ namespace OSD
         private byte bigDistanceChar = 0x1B;
         
         private byte climbChar = 0x1A;
-        private byte velocityChar = 0x10;
+        private byte velocityChar = 0x18; // m/s (fork: base metric speed unit)
         private byte altitudeChar = 0xc;
 
-        private float convertspeed = 3.6f;
+        private float convertspeed = 1.0f; // fork: m/s base, was 3.6 (km/h)
         private float converth = 1.0f;
         private float tempconv = 10;
         private float tempconvAdd = 0;
@@ -111,7 +111,7 @@ namespace OSD
         public void do_converts () {
 			switch(converts) { 
 			case false:
-				convertspeed = 3.6f;
+				convertspeed = 1.0f; // fork: m/s
 				converth = 1.0f;
 				tempconv = 10;
 				tempconvAdd = 0;
@@ -120,11 +120,11 @@ namespace OSD
 				temperatureChar = 0xBA;
 				bigDistanceChar = 0x1B;
 				climbChar = 0x1A;
-				velocityChar = 0x10;
+				velocityChar = 0x18;
 				altitudeChar = 0x6D;
 				//smallDistanceChar = 0x6D;
 				chrHigh =0x0c;
-				chrSpe = 0x10;
+				chrSpe = 0x18;
 				break;
 				
 			case true:
@@ -482,8 +482,8 @@ namespace OSD
             float k;
 
             if (is_alt(fAlt)) {
-                c = 0x18; //m/s
-                k = 3.6f;
+                c = 0x10; // alternate units = km/h (fork: base is m/s)
+                k = 1.0f/3.6f;
             } else {
                 c = velocityChar;
                 k = 1.0f;
@@ -612,8 +612,8 @@ namespace OSD
             float k;
 
             if (is_alt(fAlt)) {
-                c = 0x18; //m/s
-                k = 3.6f;
+                c = 0x10; // alternate units = km/h (fork: base is m/s)
+                k = 1.0f/3.6f;
             } else {
                 c = velocityChar;
                 k = 1.0f;
@@ -642,8 +642,8 @@ namespace OSD
             float k;
 
             if (is_alt(fAlt)) {
-                c = 0x18; //m/s
-                k=3.6f;                
+                c = 0x10; // alternate units = km/h (fork: base is m/s)
+                k=1.0f/3.6f;                
             }else{
                 c=velocityChar;
                 k=1.0f;

@@ -331,12 +331,12 @@ namespace OSD {
                 pi[a++] = new Panel("Battery Percent", pan.panBatteryPercent, 14, 15, panBatteryPercent_XY, 1, UI_Mode.UI_Checkbox, 0, "Show percent, not used mAH");
                 pi[a++] = new Panel("Current", pan.panCur_A, 14, 14, panCurrA_XY, 1, UI_Mode.UI_Filter, 0, "Smooth value",-1,"", 0, "less accurate - only a tenth");
 
-                pi[a++] = new Panel("Velocity", pan.panVel, 1, 2, panVel_XY, 1, UI_Mode.UI_Checkbox, 0, "Show in m/s");
-                pi[a++] = new Panel("Air Speed", pan.panAirSpeed, 1, 1, panAirSpeed_XY, 1, UI_Mode.UI_Checkbox, 0, "Show in m/s");
+                pi[a++] = new Panel("Velocity", pan.panVel, 1, 2, panVel_XY, 1, UI_Mode.UI_Checkbox, 0, "Show in km/h");
+                pi[a++] = new Panel("Air Speed", pan.panAirSpeed, 1, 1, panAirSpeed_XY, 1, UI_Mode.UI_Checkbox, 0, "Show in km/h");
                 pi[a++] = new Panel("Throttle", pan.panThr, 1, 3, panThr_XY, 1);
                 pi[a++] = new Panel("Flight Mode", pan.panFlightMode, 1, 13, panFMod_XY, 1);
 
-                pi[a++] = new Panel("Wind Speed",    pan.panWindSpeed, 24, 7,  panWindSpeed_XY,1, UI_Mode.UI_Checkbox, 0, "Show in m/s",  0, "Point to source");
+                pi[a++] = new Panel("Wind Speed",    pan.panWindSpeed, 24, 7,  panWindSpeed_XY,1, UI_Mode.UI_Checkbox, 0, "Show in km/h",  0, "Point to source");
                 pi[a++] = new Panel("Warnings",      pan.panWarn,       9, 4,  panWarn_XY,    -1, UI_Mode.UI_Checkbox, 1, "Enable GeoFence warning");
                 pi[a++] = new Panel("Time",          pan.panTime,      23, 4,  panTime_XY,    -1, UI_Mode.UI_Checkbox, 0,"Blinking semicolon");
                 pi[a++] = new Panel("RSSI",          pan.panRSSI,       7, 13, panRSSI_XY,     1, UI_Mode.UI_Filter, 0, "Smooth value",-1,"", 0, "Show sign '%'");
@@ -488,8 +488,8 @@ namespace OSD {
 
             if (!pan.converts) {
                 UNITS_combo.SelectedIndex = 0; //metric
-                STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (m/min) / 10" : "Stall Speed (km/h)";
-                OVERSPEED_label.Text = "Overspeed (km/h)";
+                STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (m/min) / 10" : "Stall Speed (m/s)";
+                OVERSPEED_label.Text = "Overspeed (m/s)";
             } else {
                 UNITS_combo.SelectedIndex = 1; //imperial
                 STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (ft/min) / 10" : "Stall Speed (mph)";
@@ -1501,8 +1501,8 @@ as_checkbox:
                 //Modify units
                 if (!pan.converts) {
                     UNITS_combo.SelectedIndex = 0; //metric
-                    STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (m/min) / 10" : "Stall Speed (km/h)";
-                    OVERSPEED_label.Text = "Overspeed (km/h)";
+                    STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (m/min) / 10" : "Stall Speed (m/s)";
+                    OVERSPEED_label.Text = "Overspeed (m/s)";
                 } else {
                     UNITS_combo.SelectedIndex = 1; //imperial
                     STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (ft/min) / 10" : "Stall Speed (mph)";
@@ -2220,8 +2220,8 @@ again:
                     //Modify units
                     if (!pan.converts) {
                         
-                        STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (m/min) / 10" : "Stall Speed (km/h)";
-                        OVERSPEED_label.Text = "Overspeed (km/h)";
+                        STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (m/min) / 10" : "Stall Speed (m/s)";
+                        OVERSPEED_label.Text = "Overspeed (m/s)";
                     } else {
                         
                         STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (ft/min) / 10" : "Stall Speed (mph)";
@@ -2950,8 +2950,8 @@ again:
         private void UNITS_combo_SelectedIndexChanged(object sender, EventArgs e) {
             if (UNITS_combo.SelectedIndex == 0) {
                 pan.converts = false; //metric
-                STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (m/min) / 10" : "Stall Speed (km/h)";
-                OVERSPEED_label.Text = "Overspeed (km/h)";
+                STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (m/min) / 10" : "Stall Speed (m/s)";
+                OVERSPEED_label.Text = "Overspeed (m/s)";
             } else if (UNITS_combo.SelectedIndex == 1) {
                 pan.converts = true; //imperial
                 STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS (ft/min) / 10" : "Stall Speed (mph)";
@@ -3037,8 +3037,8 @@ again:
 
             if (UNITS_combo.SelectedIndex == 0) {
                 pan.converts = false; //metric
-                STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS(m/min)/10" : "Stall Speed (km/h)";
-                OVERSPEED_label.Text = "Overspeed (km/h)";
+                STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS(m/min)/10" : "Stall Speed (m/s)";
+                OVERSPEED_label.Text = "Overspeed (m/s)";
             } else if (UNITS_combo.SelectedIndex == 1) {
                 pan.converts = true; //imperial
                 STALL_label.Text = cbxModelType.SelectedItem.ToString() == "Copter" ? "Max VS(ft/min)/10" : "Stall Speed (mph)";

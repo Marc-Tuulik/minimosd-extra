@@ -45,10 +45,15 @@ on the telemetry port; the firmware autobauds, 115200 recommended):
   setup screen) now read **m/s** instead of km/h. The per-panel "alternate
   units" toggle shows km/h.
 * Note: metric stall / overspeed warning thresholds are now interpreted in m/s —
-  re-enter them accordingly. The bundled configurator still *labels* speeds as
-  km/h (cosmetic only), and its per-panel "alternate units" checkbox on speed
-  panels now means km/h (it used to mean m/s) — leave it unchecked for m/s.
-  When placing panels, don't butt "Real heading" (COG) against "Heading": COG
+  re-enter them accordingly.
+* The configurator (source in `Tools/OSD`, binary in `Released/OSD_Config.exe`)
+  was updated to match: its simulator renders metric speeds in m/s with the
+  right glyph, the stall/overspeed labels say m/s, and the per-panel speed
+  checkbox is labeled "Show in km/h" (the alternate unit now that the base is
+  m/s). Rebuilt for .NET Framework 4.0 (`MSBuild OSD.csproj /p:Configuration=Release
+  /p:TargetFrameworkVersion=v4.0`; two pre-existing short/ushort mismatches in
+  the checked-in source were fixed along the way).
+* When placing panels, don't butt "Real heading" (COG) against "Heading": COG
   is 7 chars wide (arrows + value + degree sign) and adjacent panels merge
   into one unreadable number on screen.
 
