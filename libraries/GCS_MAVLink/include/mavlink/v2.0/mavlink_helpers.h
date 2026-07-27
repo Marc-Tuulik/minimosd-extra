@@ -793,7 +793,8 @@ MAVLINK_HELPER uint8_t mavlink_frame_char_buffer(mavlink_message_t* rxmsg,
 				status->msg_received = MAVLINK_FRAMING_BAD_SIGNATURE;
 			}
 			status->parse_state = MAVLINK_PARSE_STATE_IDLE;
-			memcpy(r_message, rxmsg, sizeof(mavlink_message_t));
+			if (r_message) // this firmware parses in place (r_message==NULL), as in the patched v1.0 library
+			    memcpy(r_message, rxmsg, sizeof(mavlink_message_t));
 		}
 		break;
 	case MAVLINK_PARSE_STATE_SIGNATURE_WAIT:
@@ -814,7 +815,8 @@ MAVLINK_HELPER uint8_t mavlink_frame_char_buffer(mavlink_message_t* rxmsg,
 				status->msg_received = MAVLINK_FRAMING_BAD_SIGNATURE;
 			}
 			status->parse_state = MAVLINK_PARSE_STATE_IDLE;
-			memcpy(r_message, rxmsg, sizeof(mavlink_message_t));
+			if (r_message) // see above - r_message may legitimately be NULL
+			    memcpy(r_message, rxmsg, sizeof(mavlink_message_t));
 		}
 		break;
 	}
@@ -835,7 +837,8 @@ MAVLINK_HELPER uint8_t mavlink_frame_char_buffer(mavlink_message_t* rxmsg,
 		status->packet_rx_success_count++;
 	}
 
-	r_message->len = rxmsg->len; // Provide visibility on how far we are into current msg
+	if (r_message)
+	    r_message->len = rxmsg->len; // Provide visibility on how far we are into current msg
 	r_mavlink_status->parse_state = status->parse_state;
 	r_mavlink_status->packet_idx = status->packet_idx;
 	r_mavlink_status->current_rx_seq = status->current_rx_seq+1;
