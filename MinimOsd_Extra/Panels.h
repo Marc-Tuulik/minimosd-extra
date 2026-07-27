@@ -73,8 +73,8 @@ static void /* NOINLINE */  printSpeed(PGM_P fmt, float s, byte alt){
     byte c;
     
     if(alt){
-	s = s /3.6;
-	c=0x18;
+	s = s * 3.6;	// metric is now m/s by default; alternate shows km/h
+	c=0x10;		// "km/h" glyph
     } else {
 	c=pgm_read_byte(&measure->spe);
     }

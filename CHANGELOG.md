@@ -1,3 +1,14 @@
+fork changes (feature/mavlink2-and-ms-speed):
+
+* MAVLink v2 support - telemetry input now parses MAVLink 2 frames (0xFD) while
+  remaining backward compatible with MAVLink 1 (0xFE). All builds now use the
+  bundled v2.0 GCS_MAVLink headers.
+* Metric speed unit changed from km/h to m/s. All metric speed panels (ground
+  speed, air speed, wind speed, max speed, setup screen) now read in m/s.
+  The per-panel "alternate units" toggle now shows km/h instead of m/s.
+  Note: metric speed warning thresholds (stall / overspeed) are now interpreted
+  in m/s and must be re-entered in the configurator accordingly.
+
 v813:
 
 * HUD borders can be turned off

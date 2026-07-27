@@ -54,10 +54,10 @@ static uint16_t     chan_raw[8]={0,0,0,0,0,0,0,0}; // значение кана�
 
 const struct Measure PROGMEM 
     metr={
-        3.6, //  converts 
+        1.0, //  converts - metric speed in m/s (was 3.6 for km/h)
         1.0,  //converth
-        0x10, //spe
-        0x0c, //high 
+        0x18, //spe - "m/s" glyph (was 0x10 "km/h")
+        0x0c, //high
         0xba, //temps
         10,  // tempconv
         0,   //tempconvAdd

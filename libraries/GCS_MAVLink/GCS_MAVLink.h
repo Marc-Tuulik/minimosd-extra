@@ -27,10 +27,10 @@
 
 #define MAVLINK_COMM_NUM_CHANNELS 1
 
-#include "include/mavlink/v1.0/ardupilotmega/version.h"
+#include "include/mavlink/v2.0/ardupilotmega/version.h"
 
 #define MAVLINK_COMM_NUM_BUFFERS 1
-#include "include/mavlink/v1.0/mavlink_types.h"
+#include "include/mavlink/v2.0/mavlink_types.h"
 
 /// MAVLink stream used for HIL interaction
 extern BetterStream	*mavlink_comm_0_port;
@@ -142,7 +142,7 @@ static inline int comm_get_txspace(mavlink_channel_t chan)
 }
 
 #define MAVLINK_USE_CONVENIENCE_FUNCTIONS
-#include "include/mavlink/v1.0/ardupilotmega/mavlink.h"
+#include "include/mavlink/v2.0/ardupilotmega/mavlink.h"
 
 uint8_t mavlink_check_target(uint8_t sysid, uint8_t compid);
 
