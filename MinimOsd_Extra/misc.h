@@ -56,21 +56,24 @@ bool parse_osd_packet(uint8_t *p){
             
 #endif
 
-#if HARDWARE_TYPE >0
  #ifdef MAVLINK_FONT_UPLOAD
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align" // yes I know
 
-        case 'f': // font via MAVlink
+        case 'f': { // font via MAVlink (now on ALL hardware - was HARDWARE_TYPE>0,
+                    // which made the configurator's charset update time out on the 328)
+            uint8_t s = SREG;
+            cli(); // the VSYNC ISR also drives SPI - a collision mid-NVM-write corrupts the char.
+                   // ~12ms with interrupts off is safe here: the CT waits for this ack before sending more.
             osd.write_NVM(*((uint16_t *)(&c->data)), (uint8_t *)(&c->data)+2); // first 2 byte is number, all another is bitmap
+            SREG = s;
             c->cmd='!'; // confirm
             mavlink_return_packet(MAVLINK_MSG_ID_ENCAPSULATED_DATA, MAVLINK_MSG_ID_ENCAPSULATED_DATA_LEN, MAVLINK_MSG_ID_ENCAPSULATED_DATA_CRC); // send packet back
-            return true;
+            } return true;
 
 #pragma GCC diagnostic pop
 
  #endif
-#endif
 
 	default:
 	    break;
