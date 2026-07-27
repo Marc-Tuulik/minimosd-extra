@@ -1934,10 +1934,10 @@ static void panFlightMode(point p){
     } pm = { .u=osd_mode };
 
     len = sizeof(subm_c_strings)/sizeof(char *);
-    
-    if(pm.m.main_mode == 4 && pm.m.sub_mode < len){
+
+    if(pm.m.main_mode == 4 && pm.m.sub_mode >= 1 && pm.m.sub_mode <= len){
         ptr = subm_c_strings;
-        mode=pm.m.sub_mode;
+        mode=pm.m.sub_mode - 1; // PX4 sub-mode enum starts at 1 (READY), array at 0 - direct indexing showed every name shifted (LOITER as "miss" etc)
     }else{
         len = sizeof(mode_c_strings)/sizeof(char *);
         ptr = mode_c_strings;

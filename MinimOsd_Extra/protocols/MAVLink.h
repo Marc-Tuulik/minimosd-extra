@@ -9,6 +9,22 @@ extern struct loc_flags lflags;  // все булевые флаги кучей
 
 extern bool mavlink_one_byte(char c);
 
+#if defined(USE_MAVLINKPX4)
+// PX4 streams NaN for estimates that are not valid yet (attitude / climb /
+// airspeed before EKF alignment). Casting NaN to int on AVR yields garbage
+// like -25205 on screen. Bit-pattern test - a plain f!=f is optimized away
+// under -ffast-math. Maps NaN/Inf to 0.
+static float px4_nan0(float f){
+    union { float f; uint32_t u; } x;
+    x.f = f;
+    if((x.u & 0x7f800000UL) == 0x7f800000UL) return 0;
+    return f;
+}
+#define NAN0(x) px4_nan0(x)
+#else
+#define NAN0(x) (x) // ArduPilot never sends NaN here - keep APM build size unchanged
+#endif
+
 bool parse_osd_packet(uint8_t *p);
 
 
@@ -303,9 +319,9 @@ float airspeed; ///< Current airspeed in m/s
  int16_t heading; ///< Current heading in degrees, in compass units (0..360, 0=north)
  uint16_t throttle; ///< Current throttle setting in integer percent, 0 to 100
 */
-                osd_airspeed = mavlink_msg_vfr_hud_get_airspeed(&msgbuf.m);
+                osd_airspeed = NAN0(mavlink_msg_vfr_hud_get_airspeed(&msgbuf.m));
                 if(osd_fix_type>0)
-                    osd_groundspeed = mavlink_msg_vfr_hud_get_groundspeed(&msgbuf.m);
+                    osd_groundspeed = NAN0(mavlink_msg_vfr_hud_get_groundspeed(&msgbuf.m));
                 else
                     osd_groundspeed = loc_speed;
                 {
@@ -314,8 +330,8 @@ float airspeed; ///< Current airspeed in m/s
                 osd_heading = h;
                 }
                 osd_throttle = (uint8_t)mavlink_msg_vfr_hud_get_throttle(&msgbuf.m);
-                osd_alt_mav = mavlink_msg_vfr_hud_get_alt(&msgbuf.m);  //  Current altitude (MSL), in meters
-                osd_climb   = mavlink_msg_vfr_hud_get_climb(&msgbuf.m);
+                osd_alt_mav = NAN0(mavlink_msg_vfr_hud_get_alt(&msgbuf.m));  //  Current altitude (MSL), in meters
+                osd_climb   = NAN0(mavlink_msg_vfr_hud_get_climb(&msgbuf.m));
                 break;
 
 /*
@@ -338,9 +354,9 @@ Serial.printf_P(PSTR("MAVLINK_MSG_ID_VISION_SPEED_ESTIMATE x=%f y=%f\n"),vx,vy);
 
     // EXTRA_1
             case MAVLINK_MSG_ID_ATTITUDE:
-                osd_att.pitch = ToDeg(mavlink_msg_attitude_get_pitch(&msgbuf.m));
-                osd_att.roll  = ToDeg(mavlink_msg_attitude_get_roll(&msgbuf.m));
-                osd_att.yaw   = ToDeg(mavlink_msg_attitude_get_yaw(&msgbuf.m));
+                osd_att.pitch = ToDeg(NAN0(mavlink_msg_attitude_get_pitch(&msgbuf.m)));
+                osd_att.roll  = ToDeg(NAN0(mavlink_msg_attitude_get_roll(&msgbuf.m)));
+                osd_att.yaw   = ToDeg(NAN0(mavlink_msg_attitude_get_yaw(&msgbuf.m)));
 //Serial.printf_P(PSTR("pitch=%f\n"), (float)osd_att.pitch ); Serial.wait();
 //LED_BLINK;
                 break;
